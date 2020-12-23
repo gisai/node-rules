@@ -4,6 +4,7 @@ const eventSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: [{ type: String, default: '' }],
     description: [{ type: String, default: '' }],
+    type: [{type: String, default: ''}],
     enabled: [{ type: Boolean, default: true }],
     displays: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
     userGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'UserGroup' },
@@ -23,12 +24,10 @@ eventSchema.pre('save', function (next) {
 // After removing an image, it must be removed from any resource that may reference him
 eventSchema.post('remove', { query: true, document: false }, function () {
   const Display = require('./display.js');
-  const Group = require('./group.js');
   const { _id } = this.getQuery();
   Promise.all([
     UserGroup.findOneAndUpdate({ images: _id }, { $pull: { images: _id } }),
-    Display.updateMany({ images: _id }, { $pull: { images: _id } }),
-    Group.updateMany({ images: _id }, { $pull: { images: _id } }),
+    Display.updateMany({ images: _id }, { $pull: { images: _id } })
   ]);
 });
 
