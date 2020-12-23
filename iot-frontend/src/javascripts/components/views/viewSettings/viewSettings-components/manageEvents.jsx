@@ -22,13 +22,12 @@ class ManageEvents extends Component {
         enabled: false,
         displays: [], 
 		description: '',
-		group:'',
+		UserGroup:'',
 		type:{
 			value: 'time',
 		}
     };
   }
-
   componentDidMount() {
     const { data: { events } } = this.props;
 	  this.setState({ isLoaded: true, events });
@@ -131,8 +130,9 @@ class ManageEvents extends Component {
 
 	/* HANDLE SUBMIT */
 	handleSubmit = (method) => {
+		console.log(this.state);
 	  const {
-	    name, enabled, displays, description, group, type, edit, elementId,
+	    name, enabled, displays, description, UserGroup, type, edit, elementId,
 	  } = this.state;
 	  const { token, update, notify } = this.props;
 	  // FORM DATA
@@ -141,7 +141,7 @@ class ManageEvents extends Component {
 	    enabled,
 	    displays,
 		description,
-		group,
+		UserGroup,
 		type
 	  };
 	  if (description !== '') { form.description = description; }
@@ -192,7 +192,7 @@ class ManageEvents extends Component {
 		enabled, 
 		displays,
 		description,
-		group,
+		UserGroup,
 		type
 	  } = this.state;
 	  if (error) {
@@ -200,6 +200,7 @@ class ManageEvents extends Component {
 	  } if (!isLoaded) {
 	    return null; // TODO: handle loading
 	  }
+	  console.log(this)
 	  const list = events.map((event) => {
 	    if (event._id === elementId) {
 	      return <Event event={event} key={event._id} edit={this.edit} active />;
@@ -213,16 +214,16 @@ class ManageEvents extends Component {
 			optionsType,
 			labelType;
 		if (this.props.data.userGroups.length > 0){
-			groupList = this.props.data.userGroups.map(group => <option value={group._id} key={group._id}>{group.name}</option>);
+			groupList = this.props.data.userGroups.map(UserGroup => <option value={UserGroup._id} key={UserGroup._id}>{UserGroup.name}</option>);
 		}
 		else {
 			groupList = (<option defaultValue key='0' value=''>"No hay grupos disponibles"</option>)
 			groupEmpty = true;
 		}
-		if (this.state.group != '') {
+		if (this.state.UserGroup != '') {
 			if(this.props.data.devices.length > 0) {
 				this.props.data.devices.forEach(device => {
-					if (device.userGroup._id === this.state.group._id) {
+					if (device.userGroup._id === this.state.UserGroup._id) {
 						deviceList = (<option key={device._id} value={device._id}>{device.name}</option>)
 						deviceEmpty = false;
 					}
@@ -291,7 +292,7 @@ class ManageEvents extends Component {
 				  	<div className="form-group">
                       	<label htmlFor="eventGroup"><FontAwesomeIcon icon="users" className="mr-2" fixedWidth />Grupo Responsable del Evento</label>
                       	<div>
-						  	<select disabled = {groupEmpty} className="custom-select" id="eventGroup" value={group} name="group" onChange={this.handleInputChange}>
+						  	<select disabled = {groupEmpty} className="custom-select" id="eventGroup" value={UserGroup} name="UserGroup" onChange={this.handleInputChange}>
 							  	<option defaultValue value = ''>-</option>
 								{groupList}
 							</select>

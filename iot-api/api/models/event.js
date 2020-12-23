@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
+const UserGroup = require('./userGroup.js');
 
 const eventSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    name: [{ type: String, default: '' }],
-    description: [{ type: String, default: '' }],
-    type: [{type: String, default: ''}],
-    enabled: [{ type: Boolean, default: true }],
+    name: { type: String, default: '' },
+    description: { type: String, default: 'Sin descripción' },
+    type: {type: Array},
+    enabled: { type: Boolean, default: true },
     displays: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
     userGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'UserGroup' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
