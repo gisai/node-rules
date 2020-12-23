@@ -1,0 +1,66 @@
+.text-secondary{
+  color: $font-secondary-color;
+}
+
+.text-display{
+  color: $display-color;
+}
+
+.text-image{
+  color: $image-color;
+}
+
+.text-group{
+  color: $group-color;
+}
+
+.text-success{
+  color: $display-color;
+}
+
+.text-warning{
+  color: $group-color;
+}
+
+.text-error{
+  color: $danger-color;
+}
+
+.login-error{
+  line-height: 1.2em;
+  min-height: 1.2em;
+}
+
+hr{
+  border-color: #495057;
+}
+
+small{
+  color: $font-secondary-color;
+}
+
+label > i,
+.card-text > i{
+  color: $font-secondary-color;
+}
+
+label,
+.form-group,
+.disable-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.image-placeholder{
+  padding: 15px;
+}
+
+.toggle{
+  cursor: pointer;
+}
+
+.toggle > .fa {
+  font-size: 1.25em;
+}

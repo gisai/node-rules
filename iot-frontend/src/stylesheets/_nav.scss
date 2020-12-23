@@ -1,0 +1,40 @@
+.btn-block + .btn-block{
+  margin-top: 0;
+}
+
+.btn-nav{
+  background-color: transparent;
+  text-align: left;
+  color: $font-secondary-color;
+}
+
+.btn-nav:hover{
+  text-decoration: none;
+  color: $font-primary-color;
+}
+
+.active .btn{
+  background-color: $primary-color;
+  color: white;
+}
+
+.nav-list{
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
+.menu{
+  padding: 30px 20px 30px 20px;
+  max-height: 80%;
+}
+
+.button-menu{
+  max-height: 100%;
+  overflow-y: scroll;
+}
+
+.navigation{
+  padding: 0 0 0 0;
+  margin-right: 15px;
+  max-height: 100%;
+}
