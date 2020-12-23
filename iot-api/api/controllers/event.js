@@ -33,7 +33,6 @@ exports.eventGetOne = async (req, res) => {
     const event = await Image.findById(query)
       .select(SELECTION.events.long)
       .populate('displays', SELECTION.displays.populate)
-      .populate('groups', SELECTION.groups.populate)
       .populate('createdBy', SELECTION.screens.populate)
       .populate('updatedBy', SELECTION.users.populate)
       .populate('userGroup', SELECTION.userGroups.populate)
