@@ -6,7 +6,12 @@
 .form-control{
   color: $font-primary-color;
 }
-
+.form-calendar{
+  margin-left: 5 px; 
+}
+.form-calendar:focus{
+  color: $font-primary-color;
+}
 .form-control[readonly]{
   color: $font-primary-color;
 }

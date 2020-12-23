@@ -107,15 +107,26 @@ class ManageEvents extends Component {
 			this.setState(prevState => {
 				let type = Object.assign({}, prevState.type); 
 				type.trigger = value;
-				type.cronData = undefined;                                            
+				type.cronData = undefined;
+				type.data = undefined;                                            
 				return { type };                                 
 			  });
 		}
 	}
 
-	handleDateChange = (event) => {
-		const { target: { name, value } } = event;
-		console.log(this)
+	handleDateChange = (date) => {
+		this.setState({
+			selectedDate: date
+		});
+		this.setState(prevState => {
+			let type = Object.assign({}, prevState.type); 
+			type.data = {
+				date : date.toLocaleDateString(),
+				hour : date.getHours().toString(),
+				minute : date.getHours().toString()
+			}
+			return { type };                                 
+		  });
 	}
 
 	/* HANDLE SUBMIT */
@@ -184,28 +195,23 @@ class ManageEvents extends Component {
 		group,
 		type
 	  } = this.state;
-
 	  if (error) {
 	    return null; // TODO: handle error
 	  } if (!isLoaded) {
 	    return null; // TODO: handle loading
 	  }
-	  console.log(this, );
 	  const list = events.map((event) => {
 	    if (event._id === elementId) {
 	      return <Event event={event} key={event._id} edit={this.edit} active />;
 	    }
 	      return <Event event={event} key={event._id} edit={this.edit} active={false} />;
 	  });
-	  console.log(this.state)
 		let groupList,
 			groupEmpty = false,
 			deviceList,
 			deviceEmpty = true,
 			optionsType,
-			labelType,
-			startDate;
-			
+			labelType;
 		if (this.props.data.userGroups.length > 0){
 			groupList = this.props.data.userGroups.map(group => <option value={group._id} key={group._id}>{group.name}</option>);
 		}
@@ -239,7 +245,7 @@ class ManageEvents extends Component {
 		} else if (type.value === 'action') {
 			let optionsTrigger = [
 				{tag: 'Sensor de aforo', value: 'capacity-sensor'},
-				{tag: 'Sensor deCalidad del Aire', value: 'air-sensor'}
+				{tag: 'Sensor de Calidad del Aire', value: 'air-sensor'}
 			]
 			optionsType = optionsTrigger.map(option => <option key= {option.value} value= {option.value} >{option.tag}</option>);
 			labelType = (<label className="mr-2" >Lanzador del Evento</label>)
@@ -317,26 +323,35 @@ class ManageEvents extends Component {
 					</div>
 					<div className="form-group">
 						{
-							this.state.type.value === 'time' && this.state.type.cronData != 'daily' ? (
-								<DatePicker
-									selected={new Date()}
-									minDate={new Date()}
-									onChange={this.handleDateChange}
-									showTimeSelect
-									timeIntervals={30}
-									dateFormat="MMMM d, yyyy h:mm aa"
-									timeFormat="HH:mm"
-								/>
-							): 						
-								<DatePicker
-									selected={new Date ()}
-									onChange={this.handleDateChange}
-									showTimeSelect
-									showTimeSelectOnly
-									timeFormat="HH:mm"
-									timeIntervals={30}
-								/> 
+						this.state.type.value === 'time' ?  (
+							<label htmlFor="eventDisplay"><FontAwesomeIcon icon={['far', 'calendar-alt']} className="mr-2" fixedWidth />Fecha del Evento</label>
+						):null
 						}
+						<div className='form-calendar'>
+							{
+								this.state.type.value === 'time' ? (
+									this.state.type.cronData === 'daily' ? (
+										<DatePicker
+										selected={this.state.selectedDate}
+										onChange={(date)=>this.handleDateChange(date)}
+										showTimeSelect
+										showTimeSelectOnly
+										timeFormat="HH:mm"
+										timeIntervals={30}
+									/> 
+									):
+									<DatePicker
+										selected={this.state.selectedDate}
+										minDate={new Date()}
+										onChange={(date)=>this.handleDateChange(date)}
+										showTimeSelect
+										timeIntervals={30}
+										dateFormat="dd/MM/yyyy HH:mm"
+										timeFormat="HH:mm"
+									/>
+								): null						
+							}
+						</div>
 					</div>
                   { !edit
                     ? <button onClick={() => this.handleSubmit('post')} type="button" className="btn btn-block btn-small btn-success"><i className="fa fa-plus-circle mr-1" aria-hidden="true" />Añadir</button>
