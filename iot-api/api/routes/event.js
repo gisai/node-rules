@@ -10,6 +10,8 @@ const checkAuth = require('../middleware/check-auth.js');
 router.get('/', checkAuth, eventController.eventGetAll);
 router.get('/:id', checkAuth, eventController.eventGetOne);
 
+/* API POST*/
+router.post('/', checkAuth, eventController.eventCreate);
 /* API PUT */
 router.put('/:id', checkAuth, eventController.eventUpdate);
 
