@@ -6,14 +6,13 @@ const eventSchema = mongoose.Schema({
     description: [{ type: String, default: '' }],
     enabled: [{ type: Boolean, default: true }],
     displays: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
-    groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
     userGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'UserGroup' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 // Before creating a new image an _id must be set in order to configure the url properly
-imageSchema.pre('save', function (next) {
+eventSchema.pre('save', function (next) {
   const id = new mongoose.Types.ObjectId();
   this._id = id;
   this.url = `${process.env.API_URL}images/${id}`;
@@ -22,7 +21,7 @@ imageSchema.pre('save', function (next) {
 });
 
 // After removing an image, it must be removed from any resource that may reference him
-imageSchema.post('remove', { query: true, document: false }, function () {
+eventSchema.post('remove', { query: true, document: false }, function () {
   const Display = require('./display.js');
   const Group = require('./group.js');
   const { _id } = this.getQuery();

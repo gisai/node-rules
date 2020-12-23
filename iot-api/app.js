@@ -28,7 +28,7 @@ const gatewaysRoutes = require('./api/routes/gateways');
 const devicesRoutes = require('./api/routes/devices');
 const updateRoutes = require('./api/routes/update');
 const userGroupsRoutes = require('./api/routes/userGroup');
-
+const eventRoutes = require('./api/routes/event')
 // Database setup
 const MONGO_ENV = process.env.MONGO_ENV || null;
 const MONGO_USER = process.env.MONGO_USER || 'administrador';
@@ -95,6 +95,7 @@ app.use('/gateways', gatewaysRoutes);
 app.use('/devices', devicesRoutes);
 app.use('/userGroups', userGroupsRoutes);
 app.use('/update', updateRoutes);
+app.use('/events', eventRoutes);
 
 // Error handling
 app.use((req, res, next) => {

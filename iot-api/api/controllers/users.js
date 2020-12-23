@@ -12,6 +12,7 @@ const Device = require('../models/device.js');
 const Gateway = require('../models/gateway.js');
 const Screen = require('../models/screen.js');
 const Location = require('../models/location.js');
+const Event = require ('../models/event.js');
 const { SELECTION, MESSAGE } = require('./static');
 
 /* GET ALL */
@@ -119,6 +120,7 @@ exports.userLogin = async (req, res) => {
           Display.find().select(SELECTION.displays.short).exec(),
           Image.find().select(SELECTION.images.short).exec(),
           Group.find().select(SELECTION.groups.short).exec(),
+          Event.find().select(SELECTION.events.short).exec()
         ] : [
           Display.find({ userGroup: user.userGroup._id }).select(SELECTION.displays.short)
             .populate('device', SELECTION.devices.populate)
@@ -130,6 +132,7 @@ exports.userLogin = async (req, res) => {
             .populate('display', SELECTION.displays.populate)
             .exec(),
           Screen.find().select(SELECTION.screens.short).exec(),
+          Event.find().select(SELECTION.events.short).exec()
         ];
         const results = await Promise.all(resources);
         const data = user.admin ? {
@@ -145,12 +148,14 @@ exports.userLogin = async (req, res) => {
           displays: results[6],
           images: results[7],
           groups: results[8],
+          events: results[9]
         } : {
           displays: results[0],
           images: results[1],
           groups: results[2],
           devices: results[3],
           screens: results[4],
+          events: results[5]
         };
         res.status(200).json({
           message: 'Auth Successful',
