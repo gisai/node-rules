@@ -22,9 +22,15 @@ class ManageEvents extends Component {
         enabled: false,
         displays: [], 
 		description: '',
-		UserGroup:'',
-		type:{
-			value: 'time',
+		userGroup:'',
+		type:'time',
+		configData: {
+			timeData:{
+				periodicity:'monthly'
+			},
+			actionData: {
+				trigger:''
+			}
 		}
     };
   }
@@ -41,15 +47,16 @@ class ManageEvents extends Component {
 	edit = (elementId) => {
 	  const { events } = this.state;
 	  const {
-	    name, enabled, displays, description, group, type
+	    name, enabled, displays, description, userGroup, type, configData
 	  } = events.find(e => e._id === elementId);
 	  this.setState({
 	    name,
 	    enabled,
 	    displays,
 		description,
-		group,
+		userGroup,
 		type,
+		configData,
 	    elementId,
 	    edit: true,
 	  });
@@ -61,11 +68,17 @@ class ManageEvents extends Component {
 	    enabled: '',
 	    description: '',
 		displays: '',
-		group: '',
-		type:{
-			value: 'time',
+		userGroup: '',
+		type: 'time',
+		elementId: '',
+		configData: {
+			timeData:{
+				periodicity:'monthly'
+			},
+			actionData: {
+				trigger:''
+			}
 		},
-	    elementId: '',
 	    edit: false,
 	  });
 	}
@@ -77,15 +90,6 @@ class ManageEvents extends Component {
 		});
 	}
 
-	handleTypeSelectChange = (event) => {
-		const { target: {value} } = event;
-		let type = this.state.type;
-		type.value = value;
-		type.cronData = '';
-		type.trigger = '';
-		this.setState(type);
-	}
-
 	setEventEnable = () => {
 		this.setState({
 			enabled : !this.state.enabled
@@ -93,24 +97,25 @@ class ManageEvents extends Component {
 	}
 
 	handleInputTypeChange = (event) => {
-		const { target: { name, value } } = event;
-		let type = this.state.type;
-		if (type.value === 'time') {
-			this.setState(prevState => {
-				let type = Object.assign({}, prevState.type); 
-				type.cronData = value;       
-				type.trigger = undefined;                              
-				return { type };                                 
-			  });
+		const { target: { value } } = event;
+		let type = this.state.type,
+			configData = {
+				timeData : {
+					periodicity: '',
+					date: '',
+					hour: '',
+					minute: ''
+				},
+				actionData: {
+					trigger: ''
+				}
+			};
+		if (type === 'time') {
+			configData.timeData.periodicity = value;
 		} else {
-			this.setState(prevState => {
-				let type = Object.assign({}, prevState.type); 
-				type.trigger = value;
-				type.cronData = undefined;
-				type.data = undefined;                                            
-				return { type };                                 
-			  });
+			configData.actionData.trigger = value;
 		}
+		this.setState({configData});
 	}
 
 	handleDateChange = (date) => {
@@ -118,21 +123,20 @@ class ManageEvents extends Component {
 			selectedDate: date
 		});
 		this.setState(prevState => {
-			let type = Object.assign({}, prevState.type); 
-			type.data = {
+			let configData = Object.assign({}, prevState.configData); 
+			configData.timeData = {
 				date : date.toLocaleDateString(),
 				hour : date.getHours().toString(),
-				minute : date.getHours().toString()
+				minute : date.getMinutes().toString()
 			}
-			return { type };                                 
+			return { configData };                                 
 		  });
 	}
 
 	/* HANDLE SUBMIT */
 	handleSubmit = (method) => {
-		console.log(this.state);
 	  const {
-	    name, enabled, displays, description, UserGroup, type, edit, elementId,
+	    name, enabled, displays, description, userGroup, type, configData, edit, elementId,
 	  } = this.state;
 	  const { token, update, notify } = this.props;
 	  // FORM DATA
@@ -141,8 +145,9 @@ class ManageEvents extends Component {
 	    enabled,
 	    displays,
 		description,
-		UserGroup,
-		type
+		userGroup,
+		type,
+		configData
 	  };
 	  if (description !== '') { form.description = description; }
 	  axios({
@@ -192,15 +197,17 @@ class ManageEvents extends Component {
 		enabled, 
 		displays,
 		description,
-		UserGroup,
-		type
+		userGroup,
+		type,
+		configData
 	  } = this.state;
+
 	  if (error) {
 	    return null; // TODO: handle error
 	  } if (!isLoaded) {
 	    return null; // TODO: handle loading
 	  }
-	  console.log(this)
+
 	  const list = events.map((event) => {
 	    if (event._id === elementId) {
 	      return <Event event={event} key={event._id} edit={this.edit} active />;
@@ -211,45 +218,38 @@ class ManageEvents extends Component {
 			groupEmpty = false,
 			deviceList,
 			deviceEmpty = true,
-			optionsType,
-			labelType;
+			labelTypeOptions,
+			configDataJson = configData;
+
+		if(type === 'time'){
+			labelTypeOptions = (<label><FontAwesomeIcon icon="redo-alt" className="mr-2" fixedWidth />Periodicidad</label>)
+		} else {
+			labelTypeOptions = (<label><FontAwesomeIcon icon="eye" className="mr-2" fixedWidth />Observable</label>)
+		}
+
+		if(Array.isArray(configData)){
+				configDataJson = configData[0]; 
+			}
 		if (this.props.data.userGroups.length > 0){
-			groupList = this.props.data.userGroups.map(UserGroup => <option value={UserGroup._id} key={UserGroup._id}>{UserGroup.name}</option>);
+			groupList = this.props.data.userGroups.map(userGroup => <option value={userGroup._id} key={userGroup._id}>{userGroup.name}</option>);
 		}
 		else {
 			groupList = (<option defaultValue key='0' value=''>"No hay grupos disponibles"</option>)
 			groupEmpty = true;
 		}
-		if (this.state.UserGroup != '') {
+		if (this.state.userGroup != '') {
 			if(this.props.data.devices.length > 0) {
 				this.props.data.devices.forEach(device => {
-					if (device.userGroup._id === this.state.UserGroup._id) {
+					if (device.userGroup._id === this.state.userGroup._id) {
 						deviceList = (<option key={device._id} value={device._id}>{device.name}</option>)
 						deviceEmpty = false;
 					}
 				});
 			} else {
-				deviceList = (<option defaultValue key='0' value=''>"No hay dispositivos en este grupo"</option>)
+				deviceList = (<option defaultValue key='0' value=''>No hay dispositivos asociados al grupo</option>)
 			}
 		} else {
-			deviceList = (<option defaultValue key='0' value=''>"No hay dispositivos disponibles"</option>)
-		}
-		if (type.value === 'time') {
-			let optionsTime = [
-				{tag: 'Mensual', value: 'monthly'}, 
-				{tag: 'Semanal', value: 'weekly'}, 
-				{tag: 'Diario', value: 'daily'} 
-			];
-			optionsType = optionsTime.map(option => <option key= {option.value} value= {option.value} >{option.tag}</option>);
-			labelType = (<label className="mr-2" >Periodicidad del Evento</label>)
-
-		} else if (type.value === 'action') {
-			let optionsTrigger = [
-				{tag: 'Sensor de aforo', value: 'capacity-sensor'},
-				{tag: 'Sensor de Calidad del Aire', value: 'air-sensor'}
-			]
-			optionsType = optionsTrigger.map(option => <option key= {option.value} value= {option.value} >{option.tag}</option>);
-			labelType = (<label className="mr-2" >Lanzador del Evento</label>)
+			deviceList = (<option defaultValue key='0' value=''>Seleccione un Grupo</option>)
 		}
 	  list.push(
 			<div key="0" className="list-group-item-action list-group-item flex-column align-items-start">
@@ -277,12 +277,12 @@ class ManageEvents extends Component {
                 <form>
                   <div className="form-row">
                     <div className="form-group col-6">
-                      <label htmlFor="name"><FontAwesomeIcon icon="stopwatch" className="mr-2" fixedWidth />Nombre</label>
+                      <label htmlFor="name"><FontAwesomeIcon icon="stopwatch" className="mr-2" fixedWidth />Nombre *</label>
                       <input type="text" className="form-control" id="name" placeholder="Nombre del Evento" name="name" value={name} onChange={this.handleInputChange} />
                     </div>
 					<div className="form-group col-3">
 						<label htmlFor="enabled"><FontAwesomeIcon icon="power-off" className="mr-2" fixedWidth />Activo</label>
-						<input type="checkbox" className="form-control" id="enabled" placeholder="Evento activo" name="enabled" value={enabled} onChange={this.setEventEnable} />
+						<input type="checkbox" className="form-control" id="enabled" placeholder="Evento activo" name="enabled" checked={enabled} onChange={this.setEventEnable} />
                   	</div>
                   </div>
                   <div className="form-group">
@@ -290,55 +290,65 @@ class ManageEvents extends Component {
                     <input type="text" className="form-control" id="description" placeholder="Descripción del evento" name="description" value={description} onChange={this.handleInputChange} />
                   </div>
 				  	<div className="form-group">
-                      	<label htmlFor="eventGroup"><FontAwesomeIcon icon="users" className="mr-2" fixedWidth />Grupo Responsable del Evento</label>
+                      	<label htmlFor="eventGroup"><FontAwesomeIcon icon="users" className="mr-2" fixedWidth />Grupo Responsable del Evento *</label>
                       	<div>
-						  	<select disabled = {groupEmpty} className="custom-select" id="eventGroup" value={UserGroup} name="UserGroup" onChange={this.handleInputChange}>
-							  	<option defaultValue value = ''>-</option>
+						  	<select disabled = {groupEmpty} className="custom-select" id="eventGroup" value={userGroup} name="userGroup" onChange={this.handleInputChange}>
+							  	<option value = ''>-</option>
 								{groupList}
 							</select>
 						</div>
 					</div>
 					<div className="form-group">
-                      	<label htmlFor="eventDisplay"><FontAwesomeIcon icon={['far', 'window-maximize']} className="mr-2" fixedWidth />Pantallas afectadas por el Evento</label>
+                      	<label htmlFor="eventDisplay"><FontAwesomeIcon icon={['far', 'window-maximize']} className="mr-2" fixedWidth />Pantallas afectadas por el Evento *</label>
                       	<div>
-						  <select disabled = {deviceEmpty} className="custom-select" id="eventDisplay" value={displays} name="eventDisplay" onChange={this.handleInputChange}>
+						  <select multiple disabled = {deviceEmpty} className="custom-select" id="eventDisplay" value={displays} name="eventDisplay" onChange={this.handleInputChange}>
 						 	{deviceList}
 							</select>
 						</div>
 					</div>
 					<div className="form-group">
-                      	<label htmlFor="typeEvent"><FontAwesomeIcon icon={['far', 'window-maximize']} className="mr-2" fixedWidth />Tipo de Evento</label>
+                      	<label htmlFor="typeEvent"><FontAwesomeIcon icon="list-alt" className="mr-2" fixedWidth />Tipo de Evento</label>
                       	<div>
-						  	<select multiple= {false} className="custom-select" id="typeEvent" name="type" value={type.value} onChange={this.handleTypeSelectChange}>
-						 		<option value="time">Temporal</option>
-								<option value="action">Acción</option>
+						  	<select multiple= {false} className="custom-select" id="typeEvent" name="type" value={type} onChange={this.handleInputChange}>
+						 		<option defaultValue value="time">Temporal (Limpiado de pantallas)</option>
+								<option value="action">Acción (Actualización de pantallas)</option>
 							</select>
 						</div>
 					</div>
 					<div className="form-group">
-						{labelType}
-						<select multiple= {false} className="custom-select" id="optionsTypeEvent"  name="optionsTypeEvent" onChange={this.handleInputTypeChange}>
-							<option defaultValue value = ''>-</option>
-							{optionsType}
-						</select>
+						{labelTypeOptions}
+						{
+							this.state.type === 'action' ? (
+							<select className="custom-select" id="typeActionOptions" name="actionOptions" value={configDataJson.actionData.trigger} onChange={this.handleInputTypeChange}>
+								<option value="peopleCapacitySensor">Sensor de Aforo</option>
+								<option value="airQuialitySensor">Sensor de Calidad del Aire</option>
+							</select>
+							): 
+							<select className="custom-select" id="typeActionOptions" name="actionOptions" value={configDataJson.timeData.periodicity} onChange={this.handleInputTypeChange}>
+								<option value="monthly">Mensual</option>
+								<option value="weekly">Semanal</option>
+								<option value="daily">Diario</option>
+							</select>
+						}
 					</div>
 					<div className="form-group">
 						{
-						this.state.type.value === 'time' ?  (
+						this.state.type === 'time' ?  (
 							<label htmlFor="eventDisplay"><FontAwesomeIcon icon={['far', 'calendar-alt']} className="mr-2" fixedWidth />Fecha del Evento</label>
 						):null
 						}
-						<div className='form-calendar'>
 							{
-								this.state.type.value === 'time' ? (
-									this.state.type.cronData === 'daily' ? (
+								this.state.type === 'time' ? (
+									configDataJson.timeData.periodicity === 'daily' ? (
 										<DatePicker
 										selected={this.state.selectedDate}
 										onChange={(date)=>this.handleDateChange(date)}
 										showTimeSelect
 										showTimeSelectOnly
-										timeFormat="HH:mm"
+										timeCaption="Time"
+										dateFormat="HH:mm"
 										timeIntervals={30}
+										timeFormat="HH:mm"
 									/> 
 									):
 									<DatePicker
@@ -351,8 +361,7 @@ class ManageEvents extends Component {
 										timeFormat="HH:mm"
 									/>
 								): null						
-							}
-						</div>
+									}
 					</div>
                   { !edit
                     ? <button onClick={() => this.handleSubmit('post')} type="button" className="btn btn-block btn-small btn-success"><i className="fa fa-plus-circle mr-1" aria-hidden="true" />Añadir</button>

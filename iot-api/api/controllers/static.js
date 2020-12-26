@@ -55,8 +55,8 @@ exports.SELECTION = {
     populate: `${required}`,
   },
   events: {
-    long: `${required} createdBy updatedBy groups displays userGroup name description enabled`,
-    short: `${required}`,
-    populate: `${required}`,
+    long: `${required} type enabled userGroup displays configData`,
+    short: `${required} type enabled userGroup displays configData`,
+    populate: `${required} type enabled userGroup displays configData`,
   }
 };

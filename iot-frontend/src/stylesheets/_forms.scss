@@ -32,3 +32,11 @@
   height: 200px;
   overflow-y: scroll;
 }
+.react-datepicker-wrapper {
+  width: auto;
+  margin-left:10px;
+}
+.react-datepicker__input-container input{
+  border:1px solid lightgray;
+  border-radius: 4px;
+}
