@@ -29,6 +29,13 @@ const devicesRoutes = require('./api/routes/devices');
 const updateRoutes = require('./api/routes/update');
 const userGroupsRoutes = require('./api/routes/userGroup');
 const eventRoutes = require('./api/routes/event')
+const Event = require ('./api/models/event.js');
+const cron = require('node-cron');
+const childProcess = require('child_process');
+
+const { SELECTION, MESSAGE } = require('./api/controllers/static');
+
+
 // Database setup
 const MONGO_ENV = process.env.MONGO_ENV || null;
 const MONGO_USER = process.env.MONGO_USER || 'administrador';
@@ -112,5 +119,44 @@ app.use((err, req, res) => {
     },
   });
 });
+
+async function tes(){
+  let x = await initDatabase();
+  let allevents = Event.find().select(SELECTION.events.short).exec();
+  allevents.then((data)=> {
+    console.log(data);
+  });
+}
+tes();
+
+
+// Function to run external node.js script
+function runScript(scriptPath, callback) {
+
+  var invoked = false;
+
+  var process = childProcess.fork(scriptPath);
+
+  process.on('error', function (err) {
+      if (invoked) return;
+      invoked = true;
+      callback(err);
+  });
+
+  process.on('exit', function (code) {
+      if (invoked) return;
+      invoked = true;
+      var err = code === 0 ? null : new Error('exit code ' + code);
+      callback(err);
+  });
+}
+//Cron job to run nodeProcessor script/
+  setTimeout(function () {
+    cron.schedule('*/5 * * * * *', function() {
+      runScript('./api/nodeRules/processor.js',function (err) {
+        if (err) throw err;
+        console.log('finished running processor.js');
+      })})
+    }, 10000);
 
 module.exports = app;
