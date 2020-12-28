@@ -11,6 +11,7 @@ WORKDIR /home/app
 # Clone repository
 # Move to the directory and install dependencies from the project
 WORKDIR /home/app/iot-api
+RUN npm install --save node-cron
 COPY package*.json ./
 RUN npm install
 # Run the app

@@ -59,7 +59,7 @@ exports.eventCreate = async (req, res) => {
     const newEvent = await Event.findById(_id).select(SELECTION.events.short);
     res.status(201).json({
       success: true,
-      message: 'Success at uploading an image to the server',
+      message: 'Success at uploading an event to the server',
       notify: `Evento '${newEvent.name}' creada`,
       resourceId: newEvent._id,
       resource: newEvent,
