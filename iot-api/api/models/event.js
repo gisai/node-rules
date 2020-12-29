@@ -8,7 +8,7 @@ const eventSchema = mongoose.Schema({
     type: {type: String, default:'time' , enum: ['time', 'action'] ,required : true},
     configData:{type: Array, required: true},
     enabled: { type: Boolean, default: false },
-    displays: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
+    displays: { type: Array},//[{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
     userGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'UserGroup', required: true},
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

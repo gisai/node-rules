@@ -33,7 +33,8 @@ const Event = require ('./api/models/event.js');
 const cron = require('node-cron');
 const childProcess = require('child_process');
 const nodeRuleProcessor = require('./api/nodeRules/processor');
-
+const RulesEngineInitializer = require('./api/nodeRules/rulesGenerator');
+const RuleEngine = require("node-rules");
 const { SELECTION, MESSAGE } = require('./api/controllers/static');
 
 
@@ -121,27 +122,31 @@ app.use((err, req, res) => {
   });
 });
 
+// Inir RuleEngine
+var ruleEngine = new RuleEngine(),
+    ruleEnegineInitialize = new RulesEngineInitializer(),
+    processor = new nodeRuleProcessor(new Date().toDateString());;
 
- function getEvents(){
-    let allEvents = Event.find().select(SELECTION.events.short).exec();
-    allEvents.then((data) => {
-      nodeRulesProcessor(data);
-        }).catch((err) => {
-          console.log(err);
-          next();
-      })
-  }
-getEvents();
+ruleEnegineInitialize.initRules();
+ruleEnegineInitialize.registerRules(ruleEngine);
 
 //Cron job to run nodeProcessor
-function nodeRulesProcessor(events){
-  setTimeout(function () {
-    cron.schedule('*/5 * * * * *', function() {
-        let processor = new nodeRuleProcessor('eventos');
-        processor.processNodeRules(events);
-      })
-    }, 10000);
-}
+setTimeout(function(){
+  cron.schedule('*/5 * * * * *', function() {
+    console.log("\n-----\n----\n---\nStarting cronTask\n------------\n");
+    var allEvents = Event.find().select(SELECTION.events.short).exec();
+    allEvents.then((data) => {
+          console.log("Running nodeRule processor with id: " + processor.name + "\n");
+          data.forEach(event => {
+                processor.processNodeRules(event,ruleEngine);
+              });
+          }).catch((err) => {
+            console.log(err);
+            next();
+        })
+    })
+}, 2000)
+
 
 
 module.exports = app;
