@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const UserGroup = require('./userGroup.js');
+const nodeRuleProcessor = require('../nodeRules/processor');
 
 const eventSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -31,6 +32,33 @@ eventSchema.post('remove', { query: true, document: false }, function () {
     UserGroup.findOneAndUpdate({ images: _id }, { $pull: { images: _id } }),
     Display.updateMany({ images: _id }, { $pull: { images: _id } })
   ]);
+});
+
+eventSchema.pre('remove', { query: true, document: false }, function(){
+  var idEvent = this._conditions._id;
+      query = this.where({_id : idEvent});
+  console.log(idEvent);
+  query.findOne(function(error, event) {
+      if (error) return handleError(err);
+      if (event) {
+          
+      }
+  })
+});
+
+eventSchema.post('findOneAndUpdate', function(){
+  var eventUpdated = this._update.$set,
+      processor = new nodeRuleProcessor("\nProcesing event updated with id  " + this._conditions._id);
+      eventUpdated._id = this._conditions._id;
+      console.log(processor.name)
+      processor.processNodeRules(eventUpdated);
+});
+
+eventSchema.post('save', function(){
+  var eventSaved = this,
+      processor = new nodeRuleProcessor("\nProcesing event saved with id " + eventSaved._id);
+      console.log(processor.name)
+      processor.processNodeRules(eventSaved);
 });
 
 

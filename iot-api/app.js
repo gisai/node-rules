@@ -30,11 +30,7 @@ const updateRoutes = require('./api/routes/update');
 const userGroupsRoutes = require('./api/routes/userGroup');
 const eventRoutes = require('./api/routes/event')
 const Event = require ('./api/models/event.js');
-const cron = require('node-cron');
-const childProcess = require('child_process');
 const nodeRuleProcessor = require('./api/nodeRules/processor');
-const RulesEngineInitializer = require('./api/nodeRules/rulesGenerator');
-const RuleEngine = require("node-rules");
 const { SELECTION, MESSAGE } = require('./api/controllers/static');
 
 
@@ -122,31 +118,23 @@ app.use((err, req, res) => {
   });
 });
 
-// Inir RuleEngine
-var ruleEngine = new RuleEngine(),
-    ruleEnegineInitialize = new RulesEngineInitializer(),
-    processor = new nodeRuleProcessor(new Date().toDateString());;
 
-ruleEnegineInitialize.initRules();
-ruleEnegineInitialize.registerRules(ruleEngine);
 
-//Cron job to run nodeProcessor
+// Init RuleEngine
+
+var processor = new nodeRuleProcessor("Init API at \n"+new Date().toLocaleString());
+
 setTimeout(function(){
-  cron.schedule('*/5 * * * * *', function() {
-    console.log("\n-----\n----\n---\nStarting cronTask\n------------\n");
     var allEvents = Event.find().select(SELECTION.events.short).exec();
     allEvents.then((data) => {
-          console.log("Running nodeRule processor with id: " + processor.name + "\n");
+          console.log("\n\nRunning nodeRule processor with name: " + processor.name + "\n");
           data.forEach(event => {
-                processor.processNodeRules(event,ruleEngine);
+                processor.processNodeRules(event);
               });
           }).catch((err) => {
             console.log(err);
             next();
         })
-    })
 }, 2000)
-
-
 
 module.exports = app;
