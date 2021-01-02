@@ -30,12 +30,9 @@ const updateRoutes = require('./api/routes/update');
 const userGroupsRoutes = require('./api/routes/userGroup');
 const eventRoutes = require('./api/routes/event')
 const Event = require ('./api/models/event.js');
-const cron = require('node-cron');
-const childProcess = require('child_process');
 const nodeRuleProcessor = require('./api/nodeRules/processor');
-
 const { SELECTION, MESSAGE } = require('./api/controllers/static');
-
+const cron = require('node-cron');
 
 // Database setup
 const MONGO_ENV = process.env.MONGO_ENV || null;
@@ -122,26 +119,26 @@ app.use((err, req, res) => {
 });
 
 
- function getEvents(){
-    let allEvents = Event.find().select(SELECTION.events.short).exec();
+
+// Init RuleEngine
+
+var processor = new nodeRuleProcessor("Init API at \n"+new Date().toLocaleString());
+
+setTimeout(function(){
+  cron.schedule('*/5 * * * * *',function(){
+    var allEvents = Event.find().select(SELECTION.events.short).exec();
     allEvents.then((data) => {
-      nodeRulesProcessor(data);
-        }).catch((err) => {
-          console.log(err);
-          next();
-      })
-  }
-getEvents();
-
-//Cron job to run nodeProcessor
-function nodeRulesProcessor(events){
-  setTimeout(function () {
-    cron.schedule('*/5 * * * * *', function() {
-        let processor = new nodeRuleProcessor('eventos');
-        processor.processNodeRules(events);
-      })
-    }, 10000);
-}
-
+      if(data.length > 0) {
+        console.log("\n\nRunning nodeRule processor with name: " + processor.name + "\n");
+        data.forEach(event => {
+              processor.processNodeRules(event);
+            });
+      }
+          }).catch((err) => {
+            console.log(err);
+            next();
+        })
+  });
+}, 3500)
 
 module.exports = app;

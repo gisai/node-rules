@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const UserGroup = require('./userGroup.js');
+const nodeRuleProcessor = require('../nodeRules/processor');
+const cron = require('node-cron');
 
 const eventSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -7,8 +9,8 @@ const eventSchema = mongoose.Schema({
     description: { type: String, default: 'Sin descripción' },
     type: {type: String, default:'time' , enum: ['time', 'action'] ,required : true},
     configData:{type: Array, required: true},
-    enabled: { type: Boolean, default: false },
-    displays: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
+    enabled: { type: Boolean },
+    displays: { type: Array},//[{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
     userGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'UserGroup', required: true},
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -31,6 +33,33 @@ eventSchema.post('remove', { query: true, document: false }, function () {
     UserGroup.findOneAndUpdate({ images: _id }, { $pull: { images: _id } }),
     Display.updateMany({ images: _id }, { $pull: { images: _id } })
   ]);
+});
+
+eventSchema.pre('remove', { query: true, document: false }, function(){
+  var idEvent = this._conditions._id;
+      query = this.where({_id : idEvent});
+  query.findOne(function(error, event) {
+      if (error) return handleError(err);
+      if (event) {
+        var processor = new nodeRuleProcessor("\nProcesing event saved with id " + idEvent);
+            processor.cleanNodeRules(event.task);
+      }
+  })
+});
+
+eventSchema.post('findOneAndUpdate', function(){
+  var eventUpdated = this._update.$set,
+      processor = new nodeRuleProcessor("\nProcesing event updated with id  " + this._conditions._id);
+      eventUpdated._id = this._conditions._id;
+      console.log(processor.name)
+      processor.processNodeRules(eventUpdated);
+});
+
+eventSchema.post('save', function(){
+  var eventSaved = this,
+      processor = new nodeRuleProcessor("\nProcesing event saved with id " + eventSaved._id);
+      console.log(processor.name)
+      processor.processNodeRules(eventSaved);
 });
 
 
