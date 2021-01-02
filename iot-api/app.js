@@ -32,7 +32,7 @@ const eventRoutes = require('./api/routes/event')
 const Event = require ('./api/models/event.js');
 const nodeRuleProcessor = require('./api/nodeRules/processor');
 const { SELECTION, MESSAGE } = require('./api/controllers/static');
-
+const cron = require('node-cron');
 
 // Database setup
 const MONGO_ENV = process.env.MONGO_ENV || null;
@@ -125,16 +125,20 @@ app.use((err, req, res) => {
 var processor = new nodeRuleProcessor("Init API at \n"+new Date().toLocaleString());
 
 setTimeout(function(){
+  cron.schedule('*/5 * * * * *',function(){
     var allEvents = Event.find().select(SELECTION.events.short).exec();
     allEvents.then((data) => {
-          console.log("\n\nRunning nodeRule processor with name: " + processor.name + "\n");
-          data.forEach(event => {
-                processor.processNodeRules(event);
-              });
+      if(data.length > 0) {
+        console.log("\n\nRunning nodeRule processor with name: " + processor.name + "\n");
+        data.forEach(event => {
+              processor.processNodeRules(event);
+            });
+      }
           }).catch((err) => {
             console.log(err);
             next();
         })
-}, 2000)
+  });
+}, 3500)
 
 module.exports = app;

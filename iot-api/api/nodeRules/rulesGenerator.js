@@ -54,11 +54,14 @@ class RulesEngineInitializer {
             "priority": 80,
             "on" : true,
             "condition" : function(R) {
-                R.when(this.name != '' && this.timeDetected); //onTime validator
+                let actualDate = new Date(),
+                    nextExecDate = new Date(this.configData[0].timeData.nextExecDate);
+                R.when(actualDate >= nextExecDate  && this.timeDetected); //onTime validator
             },
             "consequence": function(R) {
                 this.result = false;
-                this.reason = "Lanzaria borrado de pantallas \n";
+                this.cleanDisplays = true;
+                this.reason = "Ejecucion del evento: \n";
                 this.reason += "name : " + this.name + "\n";
                 this.reason += "id : " + this._id + "\n";
                 this.reason += "type :" + this.type + "\n";
@@ -91,6 +94,10 @@ class RulesEngineInitializer {
             ruleEngine.register(rule);
         });
         return ruleEngine;
+    }
+
+    validateDate(date){
+        console.log(JSON.stringify(date));
     }
 }
 module.exports  = RulesEngineInitializer; 

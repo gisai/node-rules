@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const UserGroup = require('./userGroup.js');
 const nodeRuleProcessor = require('../nodeRules/processor');
+const cron = require('node-cron');
 
 const eventSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -8,7 +9,7 @@ const eventSchema = mongoose.Schema({
     description: { type: String, default: 'Sin descripción' },
     type: {type: String, default:'time' , enum: ['time', 'action'] ,required : true},
     configData:{type: Array, required: true},
-    enabled: { type: Boolean, default: false },
+    enabled: { type: Boolean },
     displays: { type: Array},//[{ type: mongoose.Schema.Types.ObjectId, ref: 'Display' }],
     userGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'UserGroup', required: true},
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -37,11 +38,11 @@ eventSchema.post('remove', { query: true, document: false }, function () {
 eventSchema.pre('remove', { query: true, document: false }, function(){
   var idEvent = this._conditions._id;
       query = this.where({_id : idEvent});
-  console.log(idEvent);
   query.findOne(function(error, event) {
       if (error) return handleError(err);
       if (event) {
-          
+        var processor = new nodeRuleProcessor("\nProcesing event saved with id " + idEvent);
+            processor.cleanNodeRules(event.task);
       }
   })
 });

@@ -7,11 +7,12 @@ import DatePicker from 'react-datepicker'
 
 /* IMPORT COMPONENTS */
 import Event from '../../../lists/lists-components/event';
+import { config } from '@fortawesome/fontawesome-svg-core';
 
 /* COMPONENTS */
 class ManageEvents extends Component {
   constructor(props) {
-    super(props);
+	super(props);
     this.state = {
         isLoaded: false,
         error: null,
@@ -26,12 +27,14 @@ class ManageEvents extends Component {
 		type:'time',
 		configData: {
 			timeData:{
-				periodicity:'monthly'
+				periodicity:'monthly',
+				nextExecDate: new Date(),
 			},
 			actionData: {
 				trigger:''
 			}
-		}
+		},
+		selectedDate: new Date(),
     };
   }
   componentDidMount() {
@@ -45,10 +48,13 @@ class ManageEvents extends Component {
   }
 
 	edit = (elementId) => {
+		console.log("entra")
 	  const { events } = this.state;
 	  const {
 	    name, enabled, displays, description, userGroup, type, configData
 	  } = events.find(e => e._id === elementId);
+	  let configDataParam = configData[0];
+
 	  this.setState({
 	    name,
 	    enabled,
@@ -56,10 +62,14 @@ class ManageEvents extends Component {
 		description,
 		userGroup,
 		type,
-		configData,
-	    elementId,
-	    edit: true,
+		configData : configDataParam,
+		elementId,
+		edit: true
 	  });
+	  console.log(this.state)
+	  console.log(configDataParam.timeData.nextExecDate)
+	  console.log(new Date(configDataParam.timeData.nextExecDate));
+	  //this.setState({selectedDate: configDataParam.timeData.nextExecDate.toLocaleDateString()});
 	}
 
 	cancel = () => {
@@ -71,15 +81,17 @@ class ManageEvents extends Component {
 		userGroup: '',
 		type: 'time',
 		elementId: '',
+		edit: false,
 		configData: {
 			timeData:{
-				periodicity:'monthly'
+				periodicity:'monthly',
+				nextExecDate: new Date(),
 			},
 			actionData: {
 				trigger:''
 			}
 		},
-	    edit: false,
+		selectedDate: new Date(),
 	  });
 	}
 
@@ -102,9 +114,7 @@ class ManageEvents extends Component {
 			configData = {
 				timeData : {
 					periodicity: '',
-					date: '',
-					hour: '',
-					minute: ''
+					nextExecDate: ''
 				},
 				actionData: {
 					trigger: ''
@@ -112,6 +122,7 @@ class ManageEvents extends Component {
 			};
 		if (type === 'time') {
 			configData.timeData.periodicity = value;
+			configData.timeData.nextExecDate = this.state.configData.timeData.nextExecDate;
 		} else {
 			configData.actionData.trigger = value;
 		}
@@ -119,15 +130,12 @@ class ManageEvents extends Component {
 	}
 
 	handleDateChange = (date) => {
-		this.setState({
-			selectedDate: date
-		});
 		this.setState(prevState => {
 			let configData = Object.assign({}, prevState.configData); 
+			date.setHours(date.getHours(),date.getMinutes());
 			configData.timeData = {
-				date : date.toLocaleDateString(),
-				hour : date.getHours().toString(),
-				minute : date.getMinutes().toString()
+				periodicity: this.state.configData.timeData.periodicity,
+				nextExecDate: date,
 			}
 			return { configData };                                 
 		  });
@@ -220,7 +228,6 @@ class ManageEvents extends Component {
 			deviceEmpty = true,
 			labelTypeOptions,
 			configDataJson = configData;
-
 		if(type === 'time'){
 			labelTypeOptions = (<label><FontAwesomeIcon icon="redo-alt" className="mr-2" fixedWidth />Periodicidad</label>)
 		} else {
@@ -282,7 +289,7 @@ class ManageEvents extends Component {
                     </div>
 					<div className="form-group col-3">
 						<label htmlFor="enabled"><FontAwesomeIcon icon="power-off" className="mr-2" fixedWidth />Activo</label>
-						<input type="checkbox" className="form-control" id="enabled" placeholder="Evento activo" name="enabled" checked={enabled} onChange={this.setEventEnable} />
+						<input type="checkbox" value={enabled} className="form-control" id="enabled" placeholder="Evento activo" name="enabled" checked={enabled} onChange={this.setEventEnable} />
                   	</div>
                   </div>
                   <div className="form-group">
@@ -341,24 +348,24 @@ class ManageEvents extends Component {
 								this.state.type === 'time' ? (
 									configDataJson.timeData.periodicity === 'daily' ? (
 										<DatePicker
-										selected={this.state.selectedDate}
+										selected={new Date(configDataJson.timeData.nextExecDate)}
+										minDate={new Date()}
 										onChange={(date)=>this.handleDateChange(date)}
 										showTimeSelect
 										showTimeSelectOnly
 										timeCaption="Time"
-										dateFormat="HH:mm"
 										timeIntervals={30}
+										dateFormat="HH:mm"
 										timeFormat="HH:mm"
 									/> 
 									):
 									<DatePicker
-										selected={this.state.selectedDate}
+										selected={new Date(configDataJson.timeData.nextExecDate)}
 										minDate={new Date()}
 										onChange={(date)=>this.handleDateChange(date)}
 										showTimeSelect
 										timeIntervals={30}
 										dateFormat="dd/MM/yyyy HH:mm"
-										timeFormat="HH:mm"
 									/>
 								): null						
 									}

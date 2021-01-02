@@ -17,17 +17,24 @@ class nodeRuleProcessor {
     }
     processNodeRules (event) {
         var RuleEngine = this.initRuleEngine();
-        event.displays = [1,2,3];
+        event.displays = [
+            {_id:2},
+            {_id:3}
+        ];
         RuleEngine.execute(event, function(data){
                 if(!data.result) {
                     console.log(data.reason)
-                } else {
-                    if(data.timeDetected){
-                        console.log("time")
+                    if (data.cleanDisplays) {
+                        console.log("Limpiado de pantallas");
+                        console.log(event.displays);
                     }
                 }
             }.bind(this)) 
-        
+    }
+    cleanNodeRules (task) {
+        setTimeout(function(){
+
+        },8000);
     }
 }
 module.exports  = nodeRuleProcessor;    
