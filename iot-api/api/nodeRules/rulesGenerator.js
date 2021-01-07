@@ -5,7 +5,8 @@ class RulesEngineInitializer {
         this.rules=[];
     }
 
-    initRules() {
+    initGeneralRules() {
+        
         let ruleIsEnabled = {
             "name": "event enabled",
             "priority": 100,
@@ -20,12 +21,13 @@ class RulesEngineInitializer {
                 R.stop();
             }
         };
+
         let ruleHasDisplays = {
             "name": "event with displays",
             "priority": 90,
             "on" : true,
             "condition" : function(R) {
-                R.when(this.displays.length <= 0);
+                R.when(this.displays && this.displays.length <= 0);
             },
             "consequence": function(R) {
                 this.result = false;
@@ -34,7 +36,11 @@ class RulesEngineInitializer {
                 R.stop();
             }
         };
+        this.rules.push(ruleIsEnabled, ruleHasDisplays);       
+    }
 
+    initEventTimeRules() {
+        
         let ruleType= {
             "name": "event type detector",
             "priority": 80,
@@ -49,7 +55,7 @@ class RulesEngineInitializer {
             }
         };
 
-        let ruleTimeCron= {
+        let ruleOnTimeCron= {
             "name": "event type time",
             "priority": 80,
             "on" : true,
@@ -68,16 +74,37 @@ class RulesEngineInitializer {
                 R.stop();
             }
         };
+        
+        this.rules.push(ruleType, ruleOnTimeCron);       
+    }
 
-        let ruleActionTrigger= {
+    initEventActionRules(){
+
+        let ruleType= {
+            "name": "event type detector",
+            "priority": 80,
+            "on" : true,
+            "condition" : function(R) {
+                R.when(this.type === 'action');
+            },
+            "consequence": function(R) {
+                this.result = true;
+                this.actionDetected = true;
+                R.next();
+            }
+        };
+
+
+        let ruleActionPeople= {
             "name": "event type action",
             "priority": 80,
             "on" : true,
             "condition" : function(R) {
-                R.when(this.name != '' && !this.timeDetected);
+                R.when(this.configData[0].actionData.trigger === 'peopleCapacitySensor');
             },
             "consequence": function(R) {
                 this.result = false;
+                this.updateDisplays = true;
                 this.reason = "Lanzaria trigger para actualizar pantallas \n";
                 this.reason += "name : " + this.name + "\n";
                 this.reason += "id : " + this._id + "\n";
@@ -85,8 +112,7 @@ class RulesEngineInitializer {
                 R.stop();
             }
         };
-        
-        this.rules.push(ruleIsEnabled, ruleHasDisplays, ruleType, ruleTimeCron, ruleActionTrigger);       
+        this.rules.push(ruleType, ruleActionPeople);       
     }
     
     registerRules(ruleEngine) {
@@ -96,8 +122,5 @@ class RulesEngineInitializer {
         return ruleEngine;
     }
 
-    validateDate(date){
-        console.log(JSON.stringify(date));
-    }
 }
 module.exports  = RulesEngineInitializer; 

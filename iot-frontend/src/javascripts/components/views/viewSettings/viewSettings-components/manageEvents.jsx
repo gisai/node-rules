@@ -1,13 +1,13 @@
 /* IMPORT MODULES */
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import axios from 'axios';
 import PropTypes, { func } from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import DatePicker from 'react-datepicker'
+import DatePicker from 'react-datepicker';
+import Select from 'react-select';
 
 /* IMPORT COMPONENTS */
 import Event from '../../../lists/lists-components/event';
-import { config } from '@fortawesome/fontawesome-svg-core';
 
 /* COMPONENTS */
 class ManageEvents extends Component {
@@ -47,14 +47,11 @@ class ManageEvents extends Component {
 	  this.setState({ isLoaded: true, events });
   }
 
-	edit = (elementId) => {
-		console.log("entra")
-	  const { events } = this.state;
+	edit = (elementId) => {	  const { events } = this.state;
 	  const {
 	    name, enabled, displays, description, userGroup, type, configData
 	  } = events.find(e => e._id === elementId);
 	  let configDataParam = configData[0];
-
 	  this.setState({
 	    name,
 	    enabled,
@@ -66,10 +63,6 @@ class ManageEvents extends Component {
 		elementId,
 		edit: true
 	  });
-	  console.log(this.state)
-	  console.log(configDataParam.timeData.nextExecDate)
-	  console.log(new Date(configDataParam.timeData.nextExecDate));
-	  //this.setState({selectedDate: configDataParam.timeData.nextExecDate.toLocaleDateString()});
 	}
 
 	cancel = () => {
@@ -102,6 +95,16 @@ class ManageEvents extends Component {
 		});
 	}
 
+	handleMultiSelectChange = (event) => {
+		let displays = [];
+		if (event) {
+			event.forEach(display => {
+				displays.push(display.value);
+			});
+		}
+		this.setState({displays : displays});	
+	}
+
 	setEventEnable = () => {
 		this.setState({
 			enabled : !this.state.enabled
@@ -131,12 +134,21 @@ class ManageEvents extends Component {
 
 	handleDateChange = (date) => {
 		this.setState(prevState => {
-			let configData = Object.assign({}, prevState.configData); 
-			date.setHours(date.getHours(),date.getMinutes());
-			configData.timeData = {
-				periodicity: this.state.configData.timeData.periodicity,
-				nextExecDate: date,
+			let configData = Object.assign({}, prevState.configData),
+				newDate = new Date(); 
+			newDate.setHours(date.getHours(),date.getMinutes());
+
+			if (this.state.configData.timeData.periodicity === 'daily') {
+				configData.timeData = {
+					nextExecDate: newDate
+				}
+			} else {
+				date.setHours(date.getHours(),date.getMinutes());
+				configData.timeData = {
+					nextExecDate: date,
+				}
 			}
+			configData.timeData.periodicity = this.state.configData.timeData.periodicity;
 			return { configData };                                 
 		  });
 	}
@@ -215,7 +227,6 @@ class ManageEvents extends Component {
 	  } if (!isLoaded) {
 	    return null; // TODO: handle loading
 	  }
-
 	  const list = events.map((event) => {
 	    if (event._id === elementId) {
 	      return <Event event={event} key={event._id} edit={this.edit} active />;
@@ -224,8 +235,10 @@ class ManageEvents extends Component {
 	  });
 		let groupList,
 			groupEmpty = false,
-			deviceList,
-			deviceEmpty = true,
+			deviceList = [],
+			deviceDefault,
+			deviceEmpty = false,
+			deviceSelected = [],
 			labelTypeOptions,
 			configDataJson = configData;
 		if(type === 'time'){
@@ -247,16 +260,24 @@ class ManageEvents extends Component {
 		if (this.state.userGroup != '') {
 			if(this.props.data.devices.length > 0) {
 				this.props.data.devices.forEach(device => {
-					if (device.userGroup._id === this.state.userGroup._id) {
-						deviceList = (<option key={device._id} value={device._id}>{device.name}</option>)
-						deviceEmpty = false;
+					if (device.userGroup === this.state.userGroup) {
+						this.state.displays.forEach(eventDisplay => {
+							if(eventDisplay === device._id) {
+								deviceSelected.push({value: device._id, label: device.name})
+							}
+						})
+						deviceList.push({value: device._id, label: device.name});
 					}
 				});
-			} else {
-				deviceList = (<option defaultValue key='0' value=''>No hay dispositivos asociados al grupo</option>)
 			}
 		} else {
-			deviceList = (<option defaultValue key='0' value=''>Seleccione un Grupo</option>)
+			deviceDefault = 'Seleccione un grupo';
+			deviceEmpty = true;
+		}
+
+		if (deviceList.length === 0 && this.state.userGroup != "") {
+			deviceEmpty = true;
+			deviceDefault = 'Grupo sin devices asociados'
 		}
 	  list.push(
 			<div key="0" className="list-group-item-action list-group-item flex-column align-items-start">
@@ -308,15 +329,23 @@ class ManageEvents extends Component {
 					<div className="form-group">
                       	<label htmlFor="eventDisplay"><FontAwesomeIcon icon={['far', 'window-maximize']} className="mr-2" fixedWidth />Pantallas afectadas por el Evento *</label>
                       	<div>
-						  <select multiple disabled = {deviceEmpty} className="custom-select" id="eventDisplay" value={displays} name="eventDisplay" onChange={this.handleInputChange}>
-						 	{deviceList}
-							</select>
+							<Select options = {deviceList}
+									isMulti
+									name="colors"
+									className="basic-multi-select"
+									classNamePrefix="select"
+									isSearchable
+									placeholder = {deviceDefault}
+									isDisabled = {deviceEmpty}
+									onChange = {this.handleMultiSelectChange}
+									value = {deviceSelected}
+							/>
 						</div>
 					</div>
 					<div className="form-group">
                       	<label htmlFor="typeEvent"><FontAwesomeIcon icon="list-alt" className="mr-2" fixedWidth />Tipo de Evento</label>
                       	<div>
-						  	<select multiple= {false} className="custom-select" id="typeEvent" name="type" value={type} onChange={this.handleInputChange}>
+						  	<select multiple = {false} className="custom-select" id="typeEvent" name="type" value={type} onChange={this.handleInputChange}>
 						 		<option defaultValue value="time">Temporal (Limpiado de pantallas)</option>
 								<option value="action">Acción (Actualización de pantallas)</option>
 							</select>
@@ -328,7 +357,6 @@ class ManageEvents extends Component {
 							this.state.type === 'action' ? (
 							<select className="custom-select" id="typeActionOptions" name="actionOptions" value={configDataJson.actionData.trigger} onChange={this.handleInputTypeChange}>
 								<option value="peopleCapacitySensor">Sensor de Aforo</option>
-								<option value="airQuialitySensor">Sensor de Calidad del Aire</option>
 							</select>
 							): 
 							<select className="custom-select" id="typeActionOptions" name="actionOptions" value={configDataJson.timeData.periodicity} onChange={this.handleInputTypeChange}>
@@ -349,7 +377,6 @@ class ManageEvents extends Component {
 									configDataJson.timeData.periodicity === 'daily' ? (
 										<DatePicker
 										selected={new Date(configDataJson.timeData.nextExecDate)}
-										minDate={new Date()}
 										onChange={(date)=>this.handleDateChange(date)}
 										showTimeSelect
 										showTimeSelectOnly
@@ -366,6 +393,7 @@ class ManageEvents extends Component {
 										showTimeSelect
 										timeIntervals={30}
 										dateFormat="dd/MM/yyyy HH:mm"
+										timeFormat="HH:mm"
 									/>
 								): null						
 									}

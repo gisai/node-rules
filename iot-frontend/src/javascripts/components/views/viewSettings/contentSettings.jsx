@@ -27,7 +27,7 @@ const ContentSettings = (props) => {
       id: 4, exact: false, text: 'Pantallas', icon: ['far', 'window-maximize'], location: '/settings/screens',
     },
     {
-      id: 5, exact: false, text: 'Funciones Temporales',  icon: 'stopwatch', location: '/settings/events',
+      id: 5, exact: false, text: 'Eventos',  icon: 'thumbtack', location: '/settings/events',
     },
   ];
   const menu = menuItems.map(item => (
