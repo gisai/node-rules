@@ -124,7 +124,7 @@ class nodeRuleProcessor {
                                             Image.findByIdAndUpdate(imageFinded._id,{
                                                 src:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp',
                                                 path:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp'
-                                            }).exec().then(console.log("src and path of image updated"));
+                                            }).exec().then(console.log("updated src and path of image with id " + imageFinded._id));
                                             Display.findByIdAndUpdate(displayFinded.id, {
                                                 images : newImages,
                                                 activeImage : newActiveImage
@@ -159,6 +159,5 @@ class nodeRuleProcessor {
                 });
         });
     }
-    
 }
 module.exports  = nodeRuleProcessor;    
