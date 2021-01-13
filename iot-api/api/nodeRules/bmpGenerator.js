@@ -5,9 +5,9 @@ class bmpGenerator {
 
     }
 
-    imageGenerator(peopleCapacity, width, height) {
+    imageGenerator(peopleCapacity, screen) {
         
-        let image = new Jimp(width, height, 'white', (err, image) => {
+        let image = new Jimp(screen.width, screen.height, 'white', (err, image) => {
                 if (err) throw err
         });
           
@@ -17,7 +17,7 @@ class bmpGenerator {
               return image
             }).then(image => {
                 console.log(image);
-              let file = './img/nodeRules/peopleCapacity_' + peopleCapacity + '.bmp'
+              let file = './img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp';
               return image.write(file) // save
             })
     }
