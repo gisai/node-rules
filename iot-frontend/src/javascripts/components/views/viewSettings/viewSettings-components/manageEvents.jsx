@@ -5,6 +5,8 @@ import PropTypes, { func } from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
+import { Route } from 'react-router-dom';
+
 
 /* IMPORT COMPONENTS */
 import Event from '../../../lists/lists-components/event';
@@ -31,7 +33,7 @@ class ManageEvents extends Component {
 				nextExecDate: new Date(),
 			},
 			actionData: {
-				trigger:''
+				trigger:'peopleCapacitySensor'
 			}
 		},
 		selectedDate: new Date(),
@@ -81,7 +83,7 @@ class ManageEvents extends Component {
 				nextExecDate: new Date(),
 			},
 			actionData: {
-				trigger:''
+				trigger:'peopleCapacitySensor'
 			}
 		},
 		selectedDate: new Date(),
@@ -102,7 +104,7 @@ class ManageEvents extends Component {
 				displays.push(display.value);
 			});
 		}
-		this.setState({displays : displays});	
+		this.setState({displays : displays});
 	}
 
 	setEventEnable = () => {
@@ -151,6 +153,18 @@ class ManageEvents extends Component {
 			configData.timeData.periodicity = this.state.configData.timeData.periodicity;
 			return { configData };                                 
 		  });
+	}
+
+	handlerAforo = () =>{
+		const { token } = this.props;
+		var aforoRandom = {data : Math.floor(Math.random() * 11)};
+		alert("PeopleCapacity change to " + aforoRandom.data);
+		axios({
+			method: 'post',
+			url : `${process.env.API_URL}sensors`,
+			data: aforoRandom,
+			headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+		});
 	}
 
 	/* HANDLE SUBMIT */
@@ -214,14 +228,12 @@ class ManageEvents extends Component {
 		edit, 
 		elementId, 
 		name, 
-		enabled, 
-		displays,
+		enabled,
 		description,
 		userGroup,
 		type,
 		configData
 	  } = this.state;
-
 	  if (error) {
 	    return null; // TODO: handle error
 	  } if (!isLoaded) {
@@ -235,10 +247,10 @@ class ManageEvents extends Component {
 	  });
 		let groupList,
 			groupEmpty = false,
-			deviceList = [],
-			deviceDefault,
-			deviceEmpty = false,
-			deviceSelected = [],
+			displayList = [],
+			displayDefault,
+			displayEmpty = false,
+			displaysSelected = [],
 			labelTypeOptions,
 			configDataJson = configData;
 		if(type === 'time'){
@@ -258,27 +270,30 @@ class ManageEvents extends Component {
 			groupEmpty = true;
 		}
 		if (this.state.userGroup != '') {
-			if(this.props.data.devices.length > 0) {
-				this.props.data.devices.forEach(device => {
-					if (device.userGroup === this.state.userGroup) {
-						this.state.displays.forEach(eventDisplay => {
-							if(eventDisplay === device._id) {
-								deviceSelected.push({value: device._id, label: device.name})
-							}
-						})
-						deviceList.push({value: device._id, label: device.name});
+			if(this.props.data.displays.length > 0) {
+				this.props.data.displays.forEach(display => {
+					if (display.userGroup === this.state.userGroup) {
+						if(this.state.displays.length > 0) {
+							this.state.displays.forEach(eventDisplay => {
+								if(eventDisplay === display._id) {
+									displaysSelected.push({value: display._id, label: display.name})
+								}
+							});
+						}
+						displayList.push({value: display._id, label: display.name});
 					}
 				});
 			}
 		} else {
-			deviceDefault = 'Seleccione un grupo';
-			deviceEmpty = true;
+			displayDefault = 'Seleccione un grupo';
+			displayEmpty = true;
 		}
 
-		if (deviceList.length === 0 && this.state.userGroup != "") {
-			deviceEmpty = true;
-			deviceDefault = 'Grupo sin devices asociados'
+		if (displayList.length === 0 && this.state.userGroup != "") {
+			displayEmpty = true;
+			displayDefault = 'Grupo sin displays asociados'
 		}
+		console.log(this.props.data)
 	  list.push(
 			<div key="0" className="list-group-item-action list-group-item flex-column align-items-start">
 			<div className="text-center elemento">
@@ -329,16 +344,16 @@ class ManageEvents extends Component {
 					<div className="form-group">
                       	<label htmlFor="eventDisplay"><FontAwesomeIcon icon={['far', 'window-maximize']} className="mr-2" fixedWidth />Pantallas afectadas por el Evento *</label>
                       	<div>
-							<Select options = {deviceList}
+							<Select options = {displayList}
 									isMulti
 									name="colors"
 									className="basic-multi-select"
 									classNamePrefix="select"
 									isSearchable
-									placeholder = {deviceDefault}
-									isDisabled = {deviceEmpty}
+									placeholder = {displayDefault}
+									isDisabled = {displayEmpty}
 									onChange = {this.handleMultiSelectChange}
-									value = {deviceSelected}
+									value = {displaysSelected}
 							/>
 						</div>
 					</div>
@@ -357,6 +372,7 @@ class ManageEvents extends Component {
 							this.state.type === 'action' ? (
 							<select className="custom-select" id="typeActionOptions" name="actionOptions" value={configDataJson.actionData.trigger} onChange={this.handleInputTypeChange}>
 								<option value="peopleCapacitySensor">Sensor de Aforo</option>
+								<option disabled value="airSensor">Sensor de Calidad del Aire</option>
 							</select>
 							): 
 							<select className="custom-select" id="typeActionOptions" name="actionOptions" value={configDataJson.timeData.periodicity} onChange={this.handleInputTypeChange}>
@@ -417,6 +433,11 @@ class ManageEvents extends Component {
                   <div className="list-group mb-3">
                     {list}
                   </div>
+				  	<div>
+						<button className = "btn btn-small btn-info" onClick={() => this.handlerAforo()}>
+				  			Update Aforo
+						</button>
+					</div>
                 </div>
               </div>
             </div>

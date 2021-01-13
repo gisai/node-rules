@@ -29,6 +29,7 @@ const devicesRoutes = require('./api/routes/devices');
 const updateRoutes = require('./api/routes/update');
 const userGroupsRoutes = require('./api/routes/userGroup');
 const eventRoutes = require('./api/routes/event');
+const sensorRoutes = require('./api/routes/sensor');
 const EventsProcessor = require('./api/nodeRules/eventsProcessor');
 const { SELECTION, MESSAGE } = require('./api/controllers/static');
 
@@ -99,6 +100,7 @@ app.use('/devices', devicesRoutes);
 app.use('/userGroups', userGroupsRoutes);
 app.use('/update', updateRoutes);
 app.use('/events', eventRoutes);
+app.use('/sensors', sensorRoutes);
 
 // Error handling
 app.use((req, res, next) => {
@@ -126,7 +128,6 @@ var eventsProcessor = new EventsProcessor()
 
 setTimeout(function(){
   eventsProcessor.initEventTimeProcessor();
-  eventsProcessor.initEventActionProcessor();
 },4000)
 
 module.exports = app;
