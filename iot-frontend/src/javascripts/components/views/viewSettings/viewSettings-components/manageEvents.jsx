@@ -70,7 +70,7 @@ class ManageEvents extends Component {
 	cancel = () => {
 	  this.setState({
 	    name: '',
-	    enabled: '',
+	    enabled: false,
 	    description: '',
 		displays: '',
 		userGroup: '',

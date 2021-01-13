@@ -1,9 +1,7 @@
 var Jimp = require('jimp');
 
 class bmpGenerator {
-    constructor(){
-
-    }
+    constructor(){}
 
     imageGenerator(peopleCapacity, screen) {
         
@@ -16,7 +14,6 @@ class bmpGenerator {
               image.print(font, 0, 0, 'Aforo: ' + peopleCapacity);
               return image
             }).then(image => {
-                console.log(image);
               let file = './img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp';
               return image.write(file) // save
             })

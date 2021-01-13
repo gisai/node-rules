@@ -30,7 +30,7 @@ const updateRoutes = require('./api/routes/update');
 const userGroupsRoutes = require('./api/routes/userGroup');
 const eventRoutes = require('./api/routes/event');
 const sensorRoutes = require('./api/routes/sensor');
-const EventsProcessor = require('./api/nodeRules/eventsProcessor');
+const initRuleProcessors = require('./api/nodeRules/initRuleProcessors');
 const { SELECTION, MESSAGE } = require('./api/controllers/static');
 
 // Database setup
@@ -120,10 +120,10 @@ app.use((err, req, res) => {
 
 // Init Events Processors
 
-var eventsProcessor = new EventsProcessor()
+var initProcessors = new initRuleProcessors()
 
 setTimeout(function(){
-  eventsProcessor.initEventTimeProcessor();
+  initProcessors.initTimeProcessor();
 },4000)
 
 module.exports = app;

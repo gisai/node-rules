@@ -37,74 +37,12 @@ class nodeRuleProcessor {
                         this.cleanDisplaysOfEvent(event.displays);
                         this.setNewNextExecDate(event);
                     } else if(data.updateDisplays){
-                        this.updateDisplaysOfEvent(event.displays, peopleCapacity)
+                        this.updateDisplaysOfEvent(event.displays, peopleCapacity);
                     }
                 }
             }.bind(this));
     }
-    updateDisplaysOfEvent (displays, peopleCapacity) {
-        var Display = require('../models/display'),
-            Image = require('../models/image'),
-            Device = require('../models/device'),
-            User = require('../models/user'),
-            Screen = require('../models/screen');
-        displays.forEach(display => {
-            Display.findOne({_id: display}).exec()
-                .then(function  (displayFinded) {
-                    var newActiveImage = displayFinded.activeImage,
-                        newImages = displayFinded.images;
-                    Device.findOne({_id: displayFinded.device}).exec()
-                        .then(function (deviceFinded) {
-                            Screen.findOne({screenCode: deviceFinded.screen}).exec()
-                                .then(function (screenDevice) {
-                                    Image.findOne({name:'peopleCapacityImage'}).exec()
-                                    .then(function (imageFinded) {
-                                        var bmpGenerator = new BmpGenerator();
-                                        bmpGenerator.imageGenerator(peopleCapacity, screenDevice);
 
-                                        if(imageFinded != null) {
-                                            if(newImages.indexOf(imageFinded._id) < 0){
-                                                newImages.push(imageFinded._id);
-                                            }
-                                            newActiveImage = imageFinded._id;
-                                            Image.findByIdAndUpdate(imageFinded._id,{
-                                                src:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp',
-                                                path:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp'
-                                            }).exec().then(console.log("src and path of image updated"));
-                                            Display.findByIdAndUpdate(displayFinded.id, {
-                                                images : newImages,
-                                                activeImage : newActiveImage
-                                            }).exec().then(console.log("Updated display with existing Image"));
-                                        } else {
-                                            var newImage = new Image();
-                                            newImage.name ='peopleCapacityImage';
-                                            newImage.description ='Image for People Capacity';
-                                            newImage.src = 'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp';
-                                            newImage.path = 'http://localhost:4000/img/nodeRules/peopleCapacity_' + peopleCapacity + '.bmp';
-                                            newImage.extension = 'bmp';
-                                            newImage.category = 'screen/peopleCapacity';
-                                            newImage.displays = [displayFinded._id];
-                                            newImage.color = 'Escala de grises';
-                                            User.findOne({name:'admin'}).exec()
-                                                .then(function(admin){
-                                                    newImage.createdBy = admin._id;
-                                                    newImage.save().then((image) => {
-                                                        console.log("New Image saved");
-                                                        newImages.push(image._id);
-                                                        newActiveImage = image._id;
-                                                        Display.findByIdAndUpdate(displayFinded._id, {
-                                                            images : newImages,
-                                                            activeImage : newActiveImage
-                                                        }).exec().then(console.log("Updated display with new Image"));
-                                                    });
-                                            })
-                                        }
-                                    })
-                                });
-                            });
-                });
-        });
-    }
     cleanDisplaysOfEvent (displays) {
         var Display = require('../models/display');
         console.log("Cleaning ActiveImages of displays: ");
@@ -113,7 +51,7 @@ class nodeRuleProcessor {
             Display.findByIdAndUpdate(
                 {_id: display._id},
                 {activeImage: null},
-                function(err, result) 
+                function(err) 
                 {
                     if (err) {
                     console.log(err);
@@ -156,6 +94,70 @@ class nodeRuleProcessor {
                     }
                 }
             )
+    }
+
+    updateDisplaysOfEvent (displays, peopleCapacity) {
+        var Display = require('../models/display'),
+            Image = require('../models/image'),
+            Device = require('../models/device'),
+            User = require('../models/user'),
+            Screen = require('../models/screen');
+        displays.forEach(display => {
+            Display.findOne({_id: display}).exec()
+                .then(function  (displayFinded) {
+                    var newActiveImage = displayFinded.activeImage,
+                        newImages = displayFinded.images;
+                    Device.findOne({_id: displayFinded.device}).exec()
+                        .then(function (deviceFinded) {
+                            Screen.findOne({screenCode: deviceFinded.screen}).exec()
+                                .then(function (screenDevice) {
+                                    Image.findOne({name:'peopleCapacityImage'}).exec()
+                                    .then(function (imageFinded) {
+                                        var bmpGenerator = new BmpGenerator();
+                                        bmpGenerator.imageGenerator(peopleCapacity, screenDevice);
+
+                                        if (imageFinded != null) {
+                                            if (newImages.indexOf(imageFinded._id) < 0) {
+                                                newImages.push(imageFinded._id);
+                                            }
+                                            newActiveImage = imageFinded._id;
+                                            Image.findByIdAndUpdate(imageFinded._id,{
+                                                src:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp',
+                                                path:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp'
+                                            }).exec().then(console.log("src and path of image updated"));
+                                            Display.findByIdAndUpdate(displayFinded.id, {
+                                                images : newImages,
+                                                activeImage : newActiveImage
+                                            }).exec().then(console.log("Updated display with existing Image"));
+                                        } else {
+                                            var newImage = new Image();
+                                            newImage.name ='peopleCapacityImage';
+                                            newImage.description ='Image for People Capacity';
+                                            newImage.src = 'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp';
+                                            newImage.path = 'http://localhost:4000/img/nodeRules/peopleCapacity_' + peopleCapacity + '.bmp';
+                                            newImage.extension = 'bmp';
+                                            newImage.category = 'screen/peopleCapacity';
+                                            newImage.displays = [displayFinded._id];
+                                            newImage.color = 'Escala de grises';
+                                            User.findOne({name:'admin'}).exec()
+                                                .then(function(admin){
+                                                    newImage.createdBy = admin._id;
+                                                    newImage.save().then((image) => {
+                                                        console.log("New Image saved");
+                                                        newImages.push(image._id);
+                                                        newActiveImage = image._id;
+                                                        Display.findByIdAndUpdate(displayFinded._id, {
+                                                            images : newImages,
+                                                            activeImage : newActiveImage
+                                                        }).exec().then(console.log("Updated display with new Image"));
+                                                    });
+                                            })
+                                        }
+                                    })
+                                });
+                            });
+                });
+        });
     }
     
 }

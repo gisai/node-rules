@@ -3,15 +3,15 @@ const nodeRuleProcessor = require('./processor');
 const Event = require ('../models/event.js');
 const { SELECTION } = require('../controllers/static');
 
-class EventsProcessor {
+class initRuleProcessors {
     constructor(){
         this.aforo = 0;
     }
 
-    initEventTimeProcessor () {
-            cron.schedule('*/1 * * * *',function(){ //Checkea eventos tipo Time cada 5 minutos.
-                var   processorEventsTime = new nodeRuleProcessor("RuleTimeProcessor "+new Date().toLocaleString()),
-                        allEvents = Event.find().select(SELECTION.events.short).exec();
+    initTimeProcessor () {
+            cron.schedule('*/1 * * * *',function(){ //Checkea eventos tipo Time cada minuto.
+                var processorEventsTime = new nodeRuleProcessor("RuleTimeProcessor " + new Date().toLocaleString()),
+                    allEvents = Event.find().select(SELECTION.events.short).exec();
                 console.log('------------------------ Time checker ------------------------');
                 allEvents.then((data) => {
                     if(data.length > 0) {
@@ -49,4 +49,4 @@ class EventsProcessor {
         }
     }
 
-module.exports  = EventsProcessor; 
+module.exports  = initRuleProcessors; 
