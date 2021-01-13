@@ -118,10 +118,6 @@ app.use((err, req, res) => {
   });
 });
 
-const testData = require('./api/nodeRules/dataTest');
-
-var testdata = new testData();
-
 // Init Events Processors
 
 var eventsProcessor = new EventsProcessor()
