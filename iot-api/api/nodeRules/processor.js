@@ -44,8 +44,7 @@ class nodeRuleProcessor {
     }
     updateDisplayOfEvent(config, display, peopleCapacity) {
         var Display = require('../models/display'),
-            Image = require('../models/image'),
-            peopleCapacityImage = new Image();
+            Image = require('../models/image');
         console.log("\nActualiza pantalla(s) de aforo a " + peopleCapacity);
         /*
         Display.findByIdAndUpdate(
@@ -60,8 +59,7 @@ class nodeRuleProcessor {
         )*/
     }
     cleanDisplaysOfEvent (displays) {
-        var Display = require('../models/display'),
-            Image = require('../models/image');
+        var Display = require('../models/display');
         console.log("Cleaning ActiveImages of displays: ");
         displays.forEach(display => {
             console.log("----> Id: ", display._id);
