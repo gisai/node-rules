@@ -121,8 +121,8 @@ class nodeRuleProcessor {
                                             }
                                             newActiveImage = imageFinded._id;
                                             Image.findByIdAndUpdate(imageFinded._id,{
-                                                src:`${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity_.bmp',
-                                                src:`${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity.bmp',
+                                                src:`${process.env.API_URL}`+'img/'+ screenDevice._id +'_peopleCapacity.bmp',
+                                                path:`${process.env.API_URL}`+'img/'+ screenDevice._id +'_peopleCapacity.bmp',
                                             }).exec().then(console.log("updated src and path of image with id " + imageFinded._id));
                                             Display.findByIdAndUpdate(displayFinded.id, {
                                                 images : newImages,
@@ -132,8 +132,8 @@ class nodeRuleProcessor {
                                             var newImage = new Image();
                                             newImage.name ='peopleCapacityImage';
                                             newImage.description ='Image for People Capacity';
-                                            newImage.src = `${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity_.bmp';
-                                            newImage.path = `${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity_.bmp';
+                                            newImage.src = `${process.env.API_URL}`+'img/'+ screenDevice._id +'_peopleCapacity.bmp';
+                                            newImage.path = `${process.env.API_URL}`+'img/'+ screenDevice._id +'_peopleCapacity.bmp';
                                             newImage.extension = 'bmp';
                                             newImage.category = 'screen/peopleCapacity';
                                             newImage.displays = [displayFinded._id];
