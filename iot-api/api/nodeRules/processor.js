@@ -115,15 +115,14 @@ class nodeRuleProcessor {
                                     .then(function (imageFinded) {
                                         var bmpGenerator = new BmpGenerator();
                                         bmpGenerator.imageGenerator(peopleCapacity, screenDevice);
-
                                         if (imageFinded != null) {
                                             if (newImages.indexOf(imageFinded._id) < 0) {
                                                 newImages.push(imageFinded._id);
                                             }
                                             newActiveImage = imageFinded._id;
                                             Image.findByIdAndUpdate(imageFinded._id,{
-                                                src:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp',
-                                                path:'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp'
+                                                src:`${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity_.bmp',
+                                                src:`${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity.bmp',
                                             }).exec().then(console.log("updated src and path of image with id " + imageFinded._id));
                                             Display.findByIdAndUpdate(displayFinded.id, {
                                                 images : newImages,
@@ -133,8 +132,8 @@ class nodeRuleProcessor {
                                             var newImage = new Image();
                                             newImage.name ='peopleCapacityImage';
                                             newImage.description ='Image for People Capacity';
-                                            newImage.src = 'http://localhost:4000/img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp';
-                                            newImage.path = 'http://localhost:4000/img/nodeRules/peopleCapacity_' + peopleCapacity + '.bmp';
+                                            newImage.src = `${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity_.bmp';
+                                            newImage.path = `${process.env.API_URL}`+'/img/nodeRules/'+ screenDevice._id +'_peopleCapacity_.bmp';
                                             newImage.extension = 'bmp';
                                             newImage.category = 'screen/peopleCapacity';
                                             newImage.displays = [displayFinded._id];

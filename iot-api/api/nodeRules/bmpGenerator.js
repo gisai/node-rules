@@ -14,7 +14,7 @@ class bmpGenerator {
               image.print(font, 0, 0, 'Aforo: ' + peopleCapacity);
               return image
             }).then(image => {
-              let file = './img/nodeRules/peopleCapacity_'+peopleCapacity+'.bmp';
+              let file = './img/nodeRules/'+ screen._id +'_peopleCapacity.bmp';
               return image.write(file) // save
             })
     }
