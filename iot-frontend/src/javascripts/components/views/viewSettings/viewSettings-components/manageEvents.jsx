@@ -5,8 +5,6 @@ import PropTypes, { func } from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
-import { Route } from 'react-router-dom';
-
 
 /* IMPORT COMPONENTS */
 import Event from '../../../lists/lists-components/event';
@@ -183,7 +181,6 @@ class ManageEvents extends Component {
 		type,
 		configData
 	  };
-	  if (description !== '') { form.description = description; }
 	  axios({
 	    method,
 	    url: edit ? `${process.env.API_URL}events/${elementId}` : `${process.env.API_URL}events`,
@@ -263,7 +260,7 @@ class ManageEvents extends Component {
 				configDataJson = configData[0]; 
 			}
 		if (this.props.data.userGroups.length > 0){
-			groupList = this.props.data.userGroups.map(userGroup => <option value={userGroup._id} key={userGroup._id}>{userGroup.name}</option>);
+			groupList = this.props.data.userGroups.map(userGroupMap => <option value={userGroupMap._id} key={userGroupMap._id}>{userGroupMap.name}</option>);
 		}
 		else {
 			groupList = (<option defaultValue key='0' value=''>"No hay grupos disponibles"</option>)
@@ -293,7 +290,6 @@ class ManageEvents extends Component {
 			displayEmpty = true;
 			displayDefault = 'Grupo sin displays asociados'
 		}
-		console.log(this.props.data)
 	  list.push(
 			<div key="0" className="list-group-item-action list-group-item flex-column align-items-start">
 			<div className="text-center elemento">
@@ -336,7 +332,7 @@ class ManageEvents extends Component {
                       	<label htmlFor="eventGroup"><FontAwesomeIcon icon="users" className="mr-2" fixedWidth />Grupo Responsable del Evento *</label>
                       	<div>
 						  	<select disabled = {groupEmpty} className="custom-select" id="eventGroup" value={userGroup} name="userGroup" onChange={this.handleInputChange}>
-							  	<option value = ''>-</option>
+							  	<option defaultValue value = ''>-</option>
 								{groupList}
 							</select>
 						</div>
