@@ -53,7 +53,6 @@ exports.eventCreate = async (req, res) => {
   try {
     const { body } = req;
     body.size = 0;
-    body.userGroup = req.AuthData.userGroup;
     const event = new Event(body);
     const { _id } = await event.save();
     const newEvent = await Event.findById(_id).select(SELECTION.events.short);
