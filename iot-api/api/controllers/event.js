@@ -74,14 +74,18 @@ exports.eventUpdate = async (req, res) => {
   try {
     const { id } = req.params;
     const { body } = req;
-    const event = await Event.findOneAndUpdate({ _id: id, userGroup: req.AuthData.userGroup }, { $set: body }, { new: true }).select(SELECTION.events.short);
-    res.status(201).json({
-      message: 'Succes at updating an event from the collection',
-      notify: `${event.name} actualizada`,
-      success: true,
-      resourceId: id,
-      resource: event,
-    });
+    const event = await Event.findOneAndUpdate({ _id: id}, { $set: body }, { new: true }).select(SELECTION.events.short);
+    if(event) {
+      res.status(201).json({
+        message: 'Succes at updating an event from the collection',
+        notify: `${event.name} actualizada`,
+        success: true,
+        resourceId: id,
+        resource: event,
+      });
+    } else {
+      res.status(404).json(MESSAGE[404]);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json(MESSAGE[500](error));
